@@ -126,16 +126,16 @@ public class DeliveryExperiment : CoroutineExperiment
             yield return niclsInterface.BeginNewSession(sessionNumber);
 
         BlackScreen();
-        yield return DoIntroductionVideo(LanguageSource.GetLanguageString("play movie"), LanguageSource.GetLanguageString("first day"));
+        //yield return DoIntroductionVideo(LanguageSource.GetLanguageString("play movie"), LanguageSource.GetLanguageString("first day"));
         yield return DoSubjectSessionQuitPrompt(sessionNumber,
                                                 LanguageSource.GetLanguageString("running participant"));
-        yield return DoMicrophoneTest(LanguageSource.GetLanguageString("microphone test"),
-                                      LanguageSource.GetLanguageString("after the beep"),
-                                      LanguageSource.GetLanguageString("recording"),
-                                      LanguageSource.GetLanguageString("playing"),
-                                      LanguageSource.GetLanguageString("recording confirmation"));
+        //yield return DoMicrophoneTest(LanguageSource.GetLanguageString("microphone test"),
+                                      //LanguageSource.GetLanguageString("after the beep"),
+                                      //LanguageSource.GetLanguageString("recording"),
+                                      //LanguageSource.GetLanguageString("playing"),
+                                      //LanguageSource.GetLanguageString("recording confirmation"));
 
-        yield return DoFamiliarization();
+        //yield return DoFamiliarization();
 
         yield return messageImageDisplayer.DisplayLanguageMessage(messageImageDisplayer.delivery_restart_messages);
 
@@ -285,6 +285,8 @@ public class DeliveryExperiment : CoroutineExperiment
             {
                 Debug.Log("Classifier wait timed out");
                 // JPB: TODO: Send message back to NICLServer
+            } else {
+                Debug.Log("CLASSIFIER SAID TO GO ---------------------------------------------------------");
             }
 
             cueStore.familiarization_object.SetActive(true);
@@ -384,13 +386,6 @@ public class DeliveryExperiment : CoroutineExperiment
     private IEnumerator DoDelivery(Environment environment, int trialNumber)
     {
         SetRamulatorState("ENCODING", true, new Dictionary<string, object>());
-        WaitUntilWithTimeout waitForClassifier = new WaitUntilWithTimeout(niclsInterface.classifierReady, 5);
-        yield return waitForClassifier;
-        if (waitForClassifier.timedOut())
-        {
-            Debug.Log("Classifier wait timed out");
-            // JPB: TODO: Send message back to NICLServer
-        }
         messageImageDisplayer.please_find_the_blah_reminder.SetActive(true);
 
         this_trial_presented_stores = new List<StoreComponent>();
@@ -428,6 +423,19 @@ public class DeliveryExperiment : CoroutineExperiment
             if (i != DELIVERIES_PER_TRIAL - 1)
             {
                 playerMovement.Freeze();
+
+                WaitUntilWithTimeout waitForClassifier = new WaitUntilWithTimeout(niclsInterface.classifierReady, 5);
+                yield return waitForClassifier;
+                if (waitForClassifier.timedOut())
+                {
+                    Debug.Log("Classifier wait timed out");
+                    // JPB: TODO: Send message back to NICLServer
+                }
+                else
+                {
+                    Debug.Log("CLASSIFIER SAID TO GO ---------------------------------------------------------");
+                }
+
                 AudioClip deliveredItem = nextStore.PopItem();
                 string deliveredItemName = deliveredItem.name;
                 audioPlayback.clip = deliveredItem;
