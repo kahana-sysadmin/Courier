@@ -279,15 +279,7 @@ public class DeliveryExperiment : CoroutineExperiment
         textDisplayer.ClearText();
         foreach (StoreComponent cueStore in this_trial_presented_stores)
         {
-            WaitUntilWithTimeout waitForClassifier = new WaitUntilWithTimeout(niclsInterface.classifierReady, 5);
-            yield return waitForClassifier;
-            if (waitForClassifier.timedOut())
-            {
-                Debug.Log("Classifier wait timed out");
-                // JPB: TODO: Send message back to NICLServer
-            } else {
-                Debug.Log("CLASSIFIER SAID TO GO ---------------------------------------------------------");
-            }
+            yield return WaitForClassifier();
 
             cueStore.familiarization_object.SetActive(true);
             string output_file_name = trial_number.ToString() + "-" + cueStore.GetStoreName();
@@ -423,18 +415,7 @@ public class DeliveryExperiment : CoroutineExperiment
             if (i != DELIVERIES_PER_TRIAL - 1)
             {
                 playerMovement.Freeze();
-
-                WaitUntilWithTimeout waitForClassifier = new WaitUntilWithTimeout(niclsInterface.classifierReady, 5);
-                yield return waitForClassifier;
-                if (waitForClassifier.timedOut())
-                {
-                    Debug.Log("Classifier wait timed out");
-                    // JPB: TODO: Send message back to NICLServer
-                }
-                else
-                {
-                    Debug.Log("CLASSIFIER SAID TO GO ---------------------------------------------------------");
-                }
+                yield return WaitForClassifier();
 
                 AudioClip deliveredItem = nextStore.PopItem();
                 string deliveredItemName = deliveredItem.name;
@@ -590,6 +571,18 @@ public class DeliveryExperiment : CoroutineExperiment
                 break;
             yield return null;
         }
+    }
+
+    private IEnumerator WaitForClassifier()
+    {
+        System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        WaitUntilWithTimeout waitForClassifier = new WaitUntilWithTimeout(niclsInterface.classifierReady, 5);
+        yield return waitForClassifier;
+        stopwatch.Stop();
+        scriptedEventReporter.ReportScriptedEvent("classifier wait",
+                                                  new Dictionary<string, object> { {"time", stopwatch.ElapsedMilliseconds},
+                                                                                   {"timed out", waitForClassifier.timedOut()} });
+        Debug.Log("CLASSIFIER SAID TO GO ---------------------------------------------------------");
     }
 
     public string GetStoreNameFromGameObjectName(string gameObjectName)
