@@ -19,11 +19,11 @@ public class DeliveryExperiment : CoroutineExperiment
     private static bool useNicls;
 
     // JPB: TODO: Make this a configuration variable
-    private static bool standaloneTesting = true; // JPB: TODO: Change to false
+    private static bool standaloneTesting = false; // JPB: TODO: Make this a config variable
 
     private const string DBOY_VERSION = "v4.1.2";
     private const string RECALL_TEXT = "*******";
-    private const int DELIVERIES_PER_TRIAL = 13;
+    private const int DELIVERIES_PER_TRIAL = 16;
     private const float MIN_FAMILIARIZATION_ISI = 0.4f;
     private const float MAX_FAMILIARIZATION_ISI = 0.6f;
     private const float FAMILIARIZATION_PRESENTATION_LENGTH = 1.5f;
@@ -78,7 +78,7 @@ public class DeliveryExperiment : CoroutineExperiment
 		// need to do this because macos thinks it knows better than you do
 	}
 
-	void Start ()
+	void Start()
     {
         if(UnityEPL.viewCheck) {
             return;
@@ -90,7 +90,8 @@ public class DeliveryExperiment : CoroutineExperiment
         QualitySettings.vSyncCount = 1;
 
         // Start syncpulses
-        standaloneTesting = true;
+        // JPB: TODO: FIX BEFORE RUNNING ON ACTUAL
+        //standaloneTesting = true;
         if (!standaloneTesting)
         {
             syncs = GameObject.Find("SyncBox").GetComponent<Syncbox>();
@@ -119,23 +120,21 @@ public class DeliveryExperiment : CoroutineExperiment
         if (useRamulator)
             yield return ramulatorInterface.BeginNewSession(sessionNumber);
 
-        //yield return niclsInterface.Test();
-
         useNicls = true;
         if (useNicls)
             yield return niclsInterface.BeginNewSession(sessionNumber);
 
         BlackScreen();
-        //yield return DoIntroductionVideo(LanguageSource.GetLanguageString("play movie"), LanguageSource.GetLanguageString("first day"));
+        yield return DoIntroductionVideo(LanguageSource.GetLanguageString("play movie"), LanguageSource.GetLanguageString("first day"));
         yield return DoSubjectSessionQuitPrompt(sessionNumber,
                                                 LanguageSource.GetLanguageString("running participant"));
-        //yield return DoMicrophoneTest(LanguageSource.GetLanguageString("microphone test"),
-                                      //LanguageSource.GetLanguageString("after the beep"),
-                                      //LanguageSource.GetLanguageString("recording"),
-                                      //LanguageSource.GetLanguageString("playing"),
-                                      //LanguageSource.GetLanguageString("recording confirmation"));
+        yield return DoMicrophoneTest(LanguageSource.GetLanguageString("microphone test"),
+                                      LanguageSource.GetLanguageString("after the beep"),
+                                      LanguageSource.GetLanguageString("recording"),
+                                      LanguageSource.GetLanguageString("playing"),
+                                      LanguageSource.GetLanguageString("recording confirmation"));
 
-        //yield return DoFamiliarization();
+        yield return DoFamiliarization();
 
         yield return messageImageDisplayer.DisplayLanguageMessage(messageImageDisplayer.delivery_restart_messages);
 
@@ -415,7 +414,15 @@ public class DeliveryExperiment : CoroutineExperiment
             if (i != DELIVERIES_PER_TRIAL - 1)
             {
                 playerMovement.Freeze();
-                yield return WaitForClassifier();
+                if (trialNumber < 2)
+                {
+                    niclsInterface.SendEncodingToNicls(1);
+                    yield return new WaitForSeconds(1);
+                }
+                else
+                {
+                    yield return WaitForClassifier();
+                }
 
                 AudioClip deliveredItem = nextStore.PopItem();
                 string deliveredItemName = deliveredItem.name;
@@ -437,6 +444,7 @@ public class DeliveryExperiment : CoroutineExperiment
                 scriptedEventReporter.ReportScriptedEvent("audio presentation finished",
                                                           new Dictionary<string, object>());
                 playerMovement.Unfreeze();
+                niclsInterface.SendEncodingToNicls(0);
             }
         }
 

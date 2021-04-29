@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-	public float forwardSpeed = 1f;
-	public float backwardSpeed = 0.5f;
-	public float turnSpeed = 1f;
-    public float turnThreshhold = 0f;
+	private float forwardSpeed = 16f;
+	private float backwardSpeed = 10f;
+	private float turnSpeed = 70f;
+    private float turnThreshhold = 0.5f;
 
 	public GameObject rotateMe;
 	public float maxRotation = 30f;
