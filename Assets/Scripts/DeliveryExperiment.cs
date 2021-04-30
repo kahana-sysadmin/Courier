@@ -23,7 +23,8 @@ public class DeliveryExperiment : CoroutineExperiment
 
     private const string DBOY_VERSION = "v4.1.2";
     private const string RECALL_TEXT = "*******";
-    private const int DELIVERIES_PER_TRIAL = 16;
+    private const int DELIVERIES_PER_TRIAL = 16; // JPB: TODO: COMMENT OUT FOR TESTING (16)
+    private const int NUM_READ_ONLY_TRIALS = 2; // JPB: TODO: COMMENT OUT FOR TESTING (2)
     private const float MIN_FAMILIARIZATION_ISI = 0.4f;
     private const float MAX_FAMILIARIZATION_ISI = 0.6f;
     private const float FAMILIARIZATION_PRESENTATION_LENGTH = 1.5f;
@@ -90,7 +91,7 @@ public class DeliveryExperiment : CoroutineExperiment
         QualitySettings.vSyncCount = 1;
 
         // Start syncpulses
-        // JPB: TODO: FIX BEFORE RUNNING ON ACTUAL
+        // JPB: TODO: COMMENT OUT FOR TESTING
         //standaloneTesting = true;
         if (!standaloneTesting)
         {
@@ -125,6 +126,7 @@ public class DeliveryExperiment : CoroutineExperiment
             yield return niclsInterface.BeginNewSession(sessionNumber);
 
         BlackScreen();
+        // JPB: TODO: COMMENT OUT FOR TESTING
         yield return DoIntroductionVideo(LanguageSource.GetLanguageString("play movie"), LanguageSource.GetLanguageString("first day"));
         yield return DoSubjectSessionQuitPrompt(sessionNumber,
                                                 LanguageSource.GetLanguageString("running participant"));
@@ -154,6 +156,8 @@ public class DeliveryExperiment : CoroutineExperiment
         }
         scriptedEventReporter.ReportScriptedEvent("store mappings", storeMappings);
 
+        niclsInterface.SendReadOnlyStateToNicls(1);
+
         int trial_number = 0;
         for (trial_number = 0; trial_number < 12; trial_number++)
         {
@@ -164,6 +168,10 @@ public class DeliveryExperiment : CoroutineExperiment
             if (useRamulator)
                 ramulatorInterface.BeginNewTrial(trial_number);
             yield return null;
+            if (trial_number == NUM_READ_ONLY_TRIALS)
+                niclsInterface.SendReadOnlyStateToNicls(0);
+            yield return null;
+
             yield return DoDelivery(environment, trial_number);
 
             BlackScreen();
@@ -278,7 +286,15 @@ public class DeliveryExperiment : CoroutineExperiment
         textDisplayer.ClearText();
         foreach (StoreComponent cueStore in this_trial_presented_stores)
         {
-            yield return WaitForClassifier();
+            if (trial_number < 2)
+            {
+                yield return new WaitForSeconds(1);
+            }
+            else
+            {
+                yield return new WaitForSeconds(1);
+                yield return WaitForClassifier();
+            }
 
             cueStore.familiarization_object.SetActive(true);
             string output_file_name = trial_number.ToString() + "-" + cueStore.GetStoreName();
@@ -416,11 +432,12 @@ public class DeliveryExperiment : CoroutineExperiment
                 playerMovement.Freeze();
                 if (trialNumber < 2)
                 {
-                    niclsInterface.SendEncodingToNicls(1);
                     yield return new WaitForSeconds(1);
+                    niclsInterface.SendEncodingToNicls(1);
                 }
                 else
                 {
+                    yield return new WaitForSeconds(1);
                     yield return WaitForClassifier();
                 }
 
@@ -444,7 +461,7 @@ public class DeliveryExperiment : CoroutineExperiment
                 scriptedEventReporter.ReportScriptedEvent("audio presentation finished",
                                                           new Dictionary<string, object>());
                 playerMovement.Unfreeze();
-                niclsInterface.SendEncodingToNicls(0);
+                //niclsInterface.SendEncodingToNicls(0);
             }
         }
 
