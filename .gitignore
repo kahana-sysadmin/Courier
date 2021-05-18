@@ -71,3 +71,6 @@ crashlytics-build.properties
 
 # Textures which are too big for github
 Assets/Town Constructor 3/Textures
+
+# Mac
+.DS_Store
