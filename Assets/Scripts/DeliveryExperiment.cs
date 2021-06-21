@@ -21,13 +21,13 @@ public class DeliveryExperiment : CoroutineExperiment
     // JPB: TODO: Make this a configuration variable
     private const bool STANDALONE_TESTING = true;
     private const bool EFR_ENABLED = true;
-    private const bool NICLS_COURIER = false;
+    private const bool NICLS_COURIER = true;
 
     private const string DBOY_VERSION = "v4.2.2";
     private const string RECALL_TEXT = "*******";
     private const int DELIVERIES_PER_TRIAL = 3; // 16;
     private const int PRACTICE_DELIVERIES_PER_TRIAL = 4; // 4;
-    private const int TRIALS_PER_SESSION = 8;
+	private const int TRIALS_PER_SESSION = 5; // NBD changed this to 5 for new two-sessions-per-block structure; to test timing 
     private const int PRACTICE_VIDEO_TRIAL_NUM = 1;
     private const int NUM_READ_ONLY_TRIALS = 2; // 2
     private const int DOUBLE_TOWN_LEARNING_DAYS = 1;
@@ -138,17 +138,17 @@ public class DeliveryExperiment : CoroutineExperiment
             yield return niclsInterface.BeginNewSession(sessionNumber, true);
 
         BlackScreen();
-        yield return DoVideo(LanguageSource.GetLanguageString("play movie"),
-                             LanguageSource.GetLanguageString("first video"),
-                             VideoSelector.VideoType.MainIntro);
-        yield return DoSubjectSessionQuitPrompt(sessionNumber,
-                                                LanguageSource.GetLanguageString("running participant"));
-        yield return DoMicrophoneTest(LanguageSource.GetLanguageString("microphone test"),
-                                     LanguageSource.GetLanguageString("after the beep"),
-                                     LanguageSource.GetLanguageString("recording"),
-                                     LanguageSource.GetLanguageString("playing"),
-                                     LanguageSource.GetLanguageString("recording confirmation"));
-        yield return DoFamiliarization();
+//        yield return DoVideo(LanguageSource.GetLanguageString("play movie"),
+//                             LanguageSource.GetLanguageString("first video"),
+//                             VideoSelector.VideoType.MainIntro);
+//        yield return DoSubjectSessionQuitPrompt(sessionNumber,
+//                                                LanguageSource.GetLanguageString("running participant"));
+//        yield return DoMicrophoneTest(LanguageSource.GetLanguageString("microphone test"),
+//                                     LanguageSource.GetLanguageString("after the beep"),
+//                                     LanguageSource.GetLanguageString("recording"),
+//                                     LanguageSource.GetLanguageString("playing"),
+//                                     LanguageSource.GetLanguageString("recording confirmation"));
+//        yield return DoFamiliarization();
 
         Environment environment = EnableEnvironment();
         Dictionary<string, object> storeMappings = new Dictionary<string, object>();
@@ -170,15 +170,15 @@ public class DeliveryExperiment : CoroutineExperiment
             // JPB: TODO: Refactor into function?
             if (sessionNumber < DOUBLE_TOWN_LEARNING_DAYS)
             {
-                yield return DisplayMessageAndWait("Spatial Learning Phase", "Spatial Learning Phase: You will locate all the stores one by one");
+                yield return DisplayMessageAndWait("Spatial Learning Phase", "Spatial Learning Phase: Let's try to find all the stores");
                 WorldScreen();
-                yield return DoTownLearning(environment);
+                //yield return DoTownLearning(environment);
                 yield return DoTownLearning(environment);
                 trialsPerSession = 5;
             }
             else if (sessionNumber < TOTAL_TOWN_LEARNING_DAYS)
             {
-                yield return DisplayMessageAndWait("Spatial Learning Phase", "Spatial Learning Phase: You will locate all the stores one by one");
+                yield return DisplayMessageAndWait("Spatial Learning Phase", "Spatial Learning Phase: Let's try to find all the stores");
                 WorldScreen();
                 yield return DoTownLearning(environment);
             }
@@ -359,7 +359,7 @@ public class DeliveryExperiment : CoroutineExperiment
 
             if (trial_number >= NUM_READ_ONLY_TRIALS)
             {
-                if (NICLS_COURIER)
+				if (useNicls)
                     yield return WaitForClassifier();
             }
 
