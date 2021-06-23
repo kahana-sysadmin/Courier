@@ -10,6 +10,7 @@ public class MeshCombineWizard : ScriptableWizard {
         ScriptableWizard.DisplayWizard<MeshCombineWizard>("Mesh Combine Wizard");
     }
 
+    [System.Obsolete]
     void OnWizardCreate() {
         if(parentOfObjectsToCombine == null) return;
 
