@@ -23,9 +23,9 @@ public class DeliveryExperiment : CoroutineExperiment
     private static bool useNicls;
 
     // JPB: TODO: Make this a configuration variable
-    private const bool STANDALONE_TESTING = true;
+    private const bool STANDALONE_TESTING = false;
     private const bool EFR_ENABLED = true;
-    private const bool NICLS_COURIER = false;
+    private const bool NICLS_COURIER = true;
     private const bool COUNTER_BALANCE_CORRECT_INCORRECT_BUTTONS = false;
 
     private const string DBOY_VERSION = "v4.2.2";
@@ -33,10 +33,10 @@ public class DeliveryExperiment : CoroutineExperiment
     private const int DELIVERIES_PER_TRIAL = STANDALONE_TESTING ? 3 : 16;
     private const int PRACTICE_DELIVERIES_PER_TRIAL = 4;
     private const int TRIALS_PER_SESSION = 5;
-    private const int TRIALS_PER_SESSION_SINGLE_TOWN_LEARNING = 4;
-    private const int TRIALS_PER_SESSION_DOUBLE_TOWN_LEARNING = 3;
+    private const int TRIALS_PER_SESSION_SINGLE_TOWN_LEARNING = 5;
+    private const int TRIALS_PER_SESSION_DOUBLE_TOWN_LEARNING = 5;
     private const int PRACTICE_VIDEO_TRIAL_NUM = 1;
-    private const int NUM_READ_ONLY_TRIALS = 2; // 2
+    private const int NUM_READ_ONLY_TRIALS = 2;
     private const int DOUBLE_TOWN_LEARNING_DAYS = 1;
     private const int TOTAL_TOWN_LEARNING_DAYS = 4;
     private const int POINTING_INDICATOR_DELAY = 15;
@@ -55,11 +55,9 @@ public class DeliveryExperiment : CoroutineExperiment
     private const float MAX_CUED_RECALL_TIME_PER_STORE = 10f;
     private const float ARROW_CORRECTION_TIME = 3f;
     private const float PAUSE_BEFORE_RETRIEVAL = 10f;
-    private const float DISPLAY_ITEM_PAUSE = 5f;
     private const float AUDIO_TEXT_DISPLAY = 1.6f;
     private const float WORD_PRESENTATION_DELAY = 1f;
     private const float WORD_PRESENTATION_JITTER = 0.25f;
-    private const float BREAK_LENGTH = 120f;
     private const float EFR_KEYPRESS_PRACTICE_PAUSE = 2f;
 
     public Camera regularCamera;
@@ -153,7 +151,7 @@ public class DeliveryExperiment : CoroutineExperiment
         if (useRamulator)
             yield return ramulatorInterface.BeginNewSession(sessionNumber);
         
-        if (useNicls)
+        if (NICLS_COURIER && useNicls)
             yield return niclsInterface.BeginNewSession(sessionNumber);
         else
             yield return niclsInterface.BeginNewSession(sessionNumber, true);
@@ -193,7 +191,7 @@ public class DeliveryExperiment : CoroutineExperiment
             {
                 yield return DisplayMessageAndWait("Spatial Learning Phase", "Spatial Learning Phase: You will locate all the stores one by one");
                 WorldScreen();
-                yield return DoTownLearning(environment);
+                //yield return DoTownLearning(environment);
                 yield return DoTownLearning(environment);
                 trialsPerSession = TRIALS_PER_SESSION_DOUBLE_TOWN_LEARNING;
             }
@@ -285,7 +283,7 @@ public class DeliveryExperiment : CoroutineExperiment
         yield return null;
         SetRamulatorState("WAITING", true, new Dictionary<string, object>());
         textDisplayer.DisplayText(description, message + "\r\nPress (x) to continue");
-        while (!Input.GetButton("q (secret)") && !Input.GetButton("x (continue)"))
+        while (!InputManager.GetButton("Secret") && !InputManager.GetButton("Continue"))
         {
             yield return null;
         }
@@ -364,7 +362,7 @@ public class DeliveryExperiment : CoroutineExperiment
 
             if (trial_number >= NUM_READ_ONLY_TRIALS)
             {
-                if (NICLS_COURIER)
+                if (NICLS_COURIER && useNicls)
                     yield return WaitForClassifier();
             }
 
@@ -521,6 +519,7 @@ public class DeliveryExperiment : CoroutineExperiment
     {
 
         SetRamulatorState("ENCODING", true, new Dictionary<string, object>());
+        scriptedEventReporter.ReportScriptedEvent("delivery start", new Dictionary<string, object>());
         messageImageDisplayer.please_find_the_blah_reminder.SetActive(true);
 
         this_trial_presented_stores = new List<StoreComponent>();
@@ -578,10 +577,9 @@ public class DeliveryExperiment : CoroutineExperiment
             float startTime = Time.time;
             while (!nextStore.PlayerInDeliveryPosition())
             {
-                if (Time.time - startTime > POINTING_INDICATOR_DELAY) {
-                    yield return DisplayPointingIndicator(nextStore, true);
-                }
                 yield return null;
+                if (Time.time - startTime > POINTING_INDICATOR_DELAY)
+                    yield return DisplayPointingIndicator(nextStore, true);
             }
             yield return DisplayPointingIndicator(nextStore, false);
 
@@ -597,7 +595,7 @@ public class DeliveryExperiment : CoroutineExperiment
                                                WORD_PRESENTATION_DELAY + WORD_PRESENTATION_JITTER);
                 yield return new WaitForSeconds(wordDelay);
 
-                if (useNicls)
+                if (NICLS_COURIER && useNicls)
                 {
                     if (practice)
                         niclsInterface.SendEncodingToNicls(1);
@@ -658,7 +656,7 @@ public class DeliveryExperiment : CoroutineExperiment
             }
 
             // Required break
-            if ((sessionNumber < DOUBLE_TOWN_LEARNING_DAYS) && (trialNumber == 1 || trialNumber == 3))
+            if ((sessionNumber < DOUBLE_TOWN_LEARNING_DAYS) && (trialNumber == 1))
                 yield return DoBreak();
             else if ((sessionNumber >= DOUBLE_TOWN_LEARNING_DAYS) && (trialNumber == 3 || trialNumber == 6))
                 yield return DoBreak();
@@ -777,7 +775,7 @@ public class DeliveryExperiment : CoroutineExperiment
         scriptedEventReporter?.ReportScriptedEvent("required break start", new Dictionary<string, object>());
         BlackScreen();
         textDisplayer.DisplayText("break prompt", LanguageSource.GetLanguageString("break"));
-        while (!Input.GetKeyDown(KeyCode.Space))
+        while (!InputManager.GetKeyDown(KeyCode.Space))
             yield return null;
         WorldScreen();
         scriptedEventReporter?.ReportScriptedEvent("required break stop", new Dictionary<string, object>());
@@ -786,6 +784,7 @@ public class DeliveryExperiment : CoroutineExperiment
     private IEnumerator DisplayPointingIndicator(StoreComponent nextStore, bool on = false)
     {
         if (on) {
+            scriptedEventReporter.ReportScriptedEvent("display pointing indicator", new Dictionary<string, object>());
             pointer.SetActive(true);
             ColorPointer(new Color(0.5f, 0.5f, 1f));
             yield return PointArrowToStore(nextStore.gameObject);
@@ -894,6 +893,8 @@ public class DeliveryExperiment : CoroutineExperiment
 
     private IEnumerator DoEfrKeypressCheck()
     {
+        scriptedEventReporter.ReportScriptedEvent("keypress check start", new Dictionary<string, object>()); // JPB: TODO: RAMULATOR?
+
         BlackScreen();
         SetEfrDisplay();
 
@@ -916,11 +917,14 @@ public class DeliveryExperiment : CoroutineExperiment
             messageImageDisplayer.efr_display, EfrButton.LeftButton);
         yield return messageImageDisplayer.DisplayMessageTimedLRKeypressBold(
             messageImageDisplayer.efr_display, 1f, efrLeftLogMsg, efrRightLogMsg);
+
+        scriptedEventReporter.ReportScriptedEvent("keypress check stop", new Dictionary<string, object>()); // JPB: TODO: RAMULATOR?
     }
 
     private IEnumerator DoEfrKeypressPractice()
     {
         BlackScreen();
+        scriptedEventReporter.ReportScriptedEvent("keypress practice start", new Dictionary<string, object>()); // JPB: TODO: RAMULATOR?
 
         // Display intro message
         messageImageDisplayer.SetGeneralBigMessageText(titleText: "efr keypress practice main", 
@@ -955,6 +959,7 @@ public class DeliveryExperiment : CoroutineExperiment
                     messageImageDisplayer.efr_display, EfrButton.RightButton);
             }
         }
+        scriptedEventReporter.ReportScriptedEvent("keypress practice stop", new Dictionary<string, object>()); // JPB: TODO: RAMULATOR?
     }
 
     //WAITING, INSTRUCT, COUNTDOWN, ENCODING, WORD, DISTRACT, RETRIEVAL
