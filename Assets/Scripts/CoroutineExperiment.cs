@@ -51,8 +51,15 @@ public abstract class CoroutineExperiment : MonoBehaviour
             textDisplayer.ChangeColor(Color.red);
             yield return new WaitForSeconds(lowBeep.clip.length);
             wavFilePath = System.IO.Path.Combine(UnityEPL.GetDataPath(), "microphone_test_" + DataReporter.RealWorldTime().ToString("yyyy-MM-dd_HH_mm_ss") + ".wav");
+
             soundRecorder.StartRecording(wavFilePath);
-            yield return new WaitForSeconds(MICROPHONE_TEST_LENGTH);
+            float startTime = Time.time;
+            while (Time.time < startTime + MICROPHONE_TEST_LENGTH)
+            {
+                yield return null;
+                if (InputManager.GetButtonDown("Secret") && Time.time - startTime > 0.1f)
+                    break;
+            }
 
             audioPlayback.clip = soundRecorder.StopRecording();
 
@@ -60,7 +67,7 @@ public abstract class CoroutineExperiment : MonoBehaviour
             textDisplayer.ChangeColor(Color.green);
 
             audioPlayback.Play();
-            yield return new WaitForSeconds(MICROPHONE_TEST_LENGTH);
+            yield return new WaitForSeconds(audioPlayback.clip.length);
             textDisplayer.ClearText();
             textDisplayer.OriginalColor();
 
@@ -95,7 +102,7 @@ public abstract class CoroutineExperiment : MonoBehaviour
         titleMessage.SetActive(false);
     }
 
-    protected IEnumerator DoVideo(string playPrompt, string repeatPrompt, VideoSelector.VideoType videoType)
+    protected IEnumerator DoVideo(string playPrompt, string repeatPrompt, VideoSelector.VideoType videoType, int videoIndex = 0)
     {
         yield return PressAnyKey(playPrompt);
 
@@ -104,7 +111,7 @@ public abstract class CoroutineExperiment : MonoBehaviour
         {
             //start video player and wait for it to stop playing
             SetRamulatorState("INSTRUCT", true, new Dictionary<string, object>());
-            videoSelector.SetIntroductionVideo(videoType);
+            videoSelector.SetIntroductionVideo(videoType, videoIndex);
             videoPlayer.StartVideo();
             while (videoPlayer.IsPlaying())
                 yield return null;

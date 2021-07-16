@@ -13,10 +13,19 @@ public class BeginExperiment : MonoBehaviour
     public UnityEngine.GameObject languageMismatchButton;
     public UnityEngine.UI.InputField participantCodeInput;
     public UnityEngine.UI.Toggle useRamulatorToggle;
+    public UnityEngine.UI.Toggle useNiclsToggle;
     public UnityEngine.UI.Text beginButtonText;
     public UnityEngine.UI.InputField sessionInput;
 
+    // JPB: TODO: Make these configuration variables
+    private const bool NICLS_COURIER = true;
+
+    string experiment_name = NICLS_COURIER ? "NiclsCourier" : "StandardCourier";
+
     private const string scene_name = "MainGame";
+
+    public const string EXP_NAME_COURIER = "Courier";
+    public const string EXP_NAME_NICLS = "NiclsCourier";
 
     private void OnEnable() {
         Cursor.lockState = CursorLockMode.None;
@@ -111,20 +120,29 @@ public class BeginExperiment : MonoBehaviour
             throw new UnityException("You are trying to start the experiment with an invalid participant name!");
         }
 
-        UnityEPL.SetSessionNumber(NextSessionNumber());
+        //UnityEPL.SetSessionNumber(NextSessionNumber());
         UnityEPL.AddParticipant(participantCodeInput.text);
-        UnityEPL.SetExperimentName("DBOY1");
+        if (experiment_name == EXP_NAME_NICLS)
+        {
+            if (useNiclsToggle.isOn)
+                experiment_name += "ClosedLoop";
+            else
+                experiment_name += "ReadOnly";
+        }
+        UnityEPL.SetExperimentName(experiment_name);
 
         LockLanguage();
-        DeliveryExperiment.ConfigureExperiment( useRamulatorToggle.isOn, NextSessionNumber(), participantCodeInput.text);
-        Debug.Log(useRamulatorToggle.isOn);
+        // JPB: TODO: Use NextSessionNumber()
+        DeliveryExperiment.ConfigureExperiment(useRamulatorToggle.isOn, useNiclsToggle.isOn, UnityEPL.GetSessionNumber(), experiment_name);
+        Debug.Log("Ram On: " + useRamulatorToggle.isOn);
+        Debug.Log("Nicls On: " + useNiclsToggle.isOn);
         SceneManager.LoadScene(scene_name);
     }
 
     private int NextSessionNumber()
     {
         string dataPath = UnityEPL.GetParticipantFolder();
-		System.IO.Directory.CreateDirectory (dataPath);
+		System.IO.Directory.CreateDirectory(dataPath);
         string[] sessionFolders = System.IO.Directory.GetDirectories(dataPath);
         int mostRecentSessionNumber = -1;
         foreach (string folder in sessionFolders)

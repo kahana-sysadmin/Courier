@@ -9,6 +9,7 @@ public static class LanguageSource
 
     private const string GERMAN_TRANSLATION_NEEDED = "GERMAN TRANSLATION NEEDED";
 
+    // JPB: TODO: Needs German translations
     private static Dictionary<string, string[]> language_string_dict = new Dictionary<string, string[]>()
     {
         {"", new string[] {"", ""}},
@@ -28,25 +29,31 @@ public static class LanguageSource
         { "correct to within", new string[] {"Good! That was correct to within degrees: ", "Fast perfekt! Abweichung in Grad zur korrekten Antwort: "} },
         { "all objects recall", new string[] {"Please recall all the objects that you delivered.", "Bitte erinnern Sie alle Gegenstände, die Sie zugestellt haben."} },
         { "all stores recall", new string[] {"Please recall all the stores that you delivered objects to.", "Bitte erinnern Sie alle Geschäfte, zu denen Sie Pakete geliefert haben."} },
-        { "end message", new string[] {"Thank you for being a great delivery person! Your cumulative score is: ", "Vielen Dank für Ihre Teilnahme! Ihre abschließende Wertung ist: "} },
+        { "end message", new string[] {"Thank you for being a great delivery person!", "Vielen Dank für Ihre Teilnahme!"} },
+        { "end message scored", new string[] {"Thank you for being a great delivery person! Your cumulative score is: ", "Vielen Dank für Ihre Teilnahme! Ihre abschließende Wertung ist: "} },
 
-        { "first video", new string[] {"Press (Y) to continue, \n Press (N) to replay instructional video.",
-                                       "Drücken Sie (Y) um fortzufahren, \n Drücken Sie (N) um das Video noch einmal zu sehen."} },
-        //{ "first practice day", new string[] {"Press (X) to proceed to the first practice delivery day.", 
-        //                                      "Drücken Sie (X) um die erste trainier Auslieferungsrunde zu starten."} },
-        { "next practice day video", new string[] {"Press (Y) to continue to the next practice delivery day, \n Press (N) to replay instructional video.", 
-                                                   "Drücken Sie (Y) um die nächste trainier Auslieferungsrunde zu starten, \n Drücken Sie (N) um das Video noch einmal zu sehen."} },
-        { "next practice day", new string[] {"Press (X) to proceed to the next practice delivery day.", 
-                                             "Drücken Sie (X) um die nächste trainier Auslieferungsrunde zu starten."} },
-        
-        //{ "first day", new string[] {"Press (X) to proceed to the first delivery day.", "Drücken Sie (X) um die erste Auslieferungsrunde zu starten."} },
+        { "standard intro video", new string[] {"Press (Y) to continue, \n Press (N) to replay instructional video.",
+                                                "Drücken Sie (Y) um fortzufahren, \n Drücken Sie (N) um das Video noch einmal zu sehen."} },
+        { "efr intro video", new string[] {"Press (Y) to continue to the next practice delivery day, \n Press (N) to replay instructional video.",
+                                           "Drücken Sie (Y) um die nächste trainier Auslieferungsrunde zu starten, \n Drücken Sie (N) um das Video noch einmal zu sehen."} },
+
+        { "nicls movie", new string[] {"Now we will return to the memory task.\nPress (Y) to continue.", GERMAN_TRANSLATION_NEEDED } },
+
         { "next day", new string[] {"Press (X) to proceed to the next delivery day.", "Drücken Sie (X) um die nächste Auslieferungsrunde zu starten."} },
+        { "next practice day", new string[] {"Press (X) to proceed to the next practice delivery day.",
+                                             "Drücken Sie (X) um die nächste trainier Auslieferungsrunde zu starten."} },
 
         { "first day main", new string [] {"Let’s start the first delivery day!", GERMAN_TRANSLATION_NEEDED}},
-        { "first day description", new string [] {"Don’t forget to continue pressing the left/right buttons when recalling items at the end of each delivery day.",
+        { "efr first day description", new string [] {"Don’t forget to continue pressing the left/right buttons when recalling items at the end of each delivery day.",
                                                   GERMAN_TRANSLATION_NEEDED}},
 
-        // JPB: TODO: NEEDS GERMAN
+        { "new efr first day description", new string [] {"Don’t forget to continue pressing the (B) button to reject words when recalling items at the end of each delivery day.",
+                                                  GERMAN_TRANSLATION_NEEDED}},
+
+        { "town learning title", new string [] { "Town Learning Phase", GERMAN_TRANSLATION_NEEDED } },
+        { "town learning main 1", new string [] { "Please locate all of the stores one by one.", GERMAN_TRANSLATION_NEEDED } },
+        { "town learning main 2", new string [] { "Let's do it again!\nPlease locate all of the stores one by one.", GERMAN_TRANSLATION_NEEDED } },
+
         { "efr left button correct message", new string [] {" Press the <i>left button</i> \nfor correct recall",
                                                             GERMAN_TRANSLATION_NEEDED}},
         { "efr left button incorrect message", new string [] {" Press the <i>left button</i> \nfor incorrect recall",
@@ -66,6 +73,7 @@ public static class LanguageSource
                                                                                  GERMAN_TRANSLATION_NEEDED}},
 
         { "practice invitation", new string [] {"Let's practice!", GERMAN_TRANSLATION_NEEDED}},
+
         { "efr check main", new string [] {"Let's make sure your keys are working.", GERMAN_TRANSLATION_NEEDED}},
         { "efr check description left button", new string [] {"Please press the <i><b>left button</b></i>, and make sure the text on the left is bolded:",
                                                               GERMAN_TRANSLATION_NEEDED}},
@@ -76,16 +84,32 @@ public static class LanguageSource
 
         { "efr keypress practice main", new string [] {"Let's practice pressing the keys.", GERMAN_TRANSLATION_NEEDED}},
         { "efr keypress practice description", new string [] {"When the <b>right button</b> text becomes bolded - press the\nright button\n\n" +
-                                                              "When the <b>left button</b> text becomes bolded - press the\nleft button", 
+                                                              "When the <b>left button</b> text becomes bolded - press the\nleft button",
                                                               GERMAN_TRANSLATION_NEEDED}},
+        { "new efr instructions title", new string[] { "Externalized Free Recall (EFR) Instructions" } },
+        { "new efr instructions main", new string[] { "In this section of the study, we would like you to vocalize words that come to your mind.\n\nPlease continue to recall as many words as possible from the just-presented list. In addition, every time a specific, salient word comes to mind, say it aloud, even if you have already recalled it or if it was not presented on the most recent delivery day.\n\nOnly say other words if they come to mind as you are trying to recall items on the most recently presented list. This is not a free-association task.\n\nIf the word you have just said aloud was NOT presented on the most recent list, or if you have already recalled it in this recall period, press the B key after recalling that word, but before recalling the next word.", GERMAN_TRANSLATION_NEEDED} },
 
-        { "fixation item", new string [] {"+", "+"}},
-        { "fixation practice message", new string [] {"Please look at the plus sign", GERMAN_TRANSLATION_NEEDED}},
+        { "new efr keypress practice main", new string [] { "Let's practice pressing the reject key.", GERMAN_TRANSLATION_NEEDED } },
+        { "new efr keypress practice description", new string [] { "Press the (B) key 20 times and wait about 3 seconds between each keypress.\n\nThe screen will automatically continue when you are done.",
+                                                              GERMAN_TRANSLATION_NEEDED } },
+
+        { "new efr check understanding title", new string[] { "EFR Review", GERMAN_TRANSLATION_NEEDED } },
+        { "new efr check understanding main", new string[] { "Please press the buzzer to call the researcher in now.", GERMAN_TRANSLATION_NEEDED } },
+
+        { "navigation note title", new string[] { "Quick Note!", GERMAN_TRANSLATION_NEEDED } },
+        { "navigation note main", new string[] { "Please navigate from store to store as quickly and efficiently as you can.", GERMAN_TRANSLATION_NEEDED } },
+
+        { "fixation item", new string [] {"+", "+"} },
+        { "fixation practice message", new string [] {"Please look at the plus sign", GERMAN_TRANSLATION_NEEDED} },
+
+        { "fr item", new string [] { "*******", "*******" } },
+        { "speak now", new string [] { "(Please speak now)", GERMAN_TRANSLATION_NEEDED} },
+        { "new efr message", new string [] { "Press the (B) key to reject a recalled item", GERMAN_TRANSLATION_NEEDED } },
 
         { "cued recall message", new string [] {"Press the (X) key after recalling the item to move to the next store", GERMAN_TRANSLATION_NEEDED}},
 
         { "play movie", new string[] {"Press any key to play movie.", "Starten Sie das Video mit beliebiger Taste."} },
-        { "recording confirmation", new string[] {"Did you hear the recording? \n(Y = Continue / N = Try Again / C = Cancel).", 
+        { "recording confirmation", new string[] {"Did you hear the recording? \n(Y = Continue / N = Try Again / C = Cancel).",
                                                   "War die Aufnahme verständlich? \n(Y = Ja, weiter / N = Neuer Versuch / C = Abbrechen)."} },
         { "playing", new string[] {"Playing...", "Spiele ab…"} },
         { "recording", new string[] {"Recording...", "Nehme auf…"} },
@@ -93,6 +117,9 @@ public static class LanguageSource
         { "running participant", new string[] {"Running a new session of Delivery Person. \n Press (Y) to continue, (N) to quit.",
                                                "Wir starten jetzt eine neue Session Fahrradkurier.\n Drücken Sie (Y) um fortzufahren, (N) um abzubrechen.",} },
         { "begin session", new string[] {"Begin session", "Beginne Session"} },
+        { "break", new string[] {"It's time for a short break.\nPlease wait for the researcher\nto come check on you before continuing the experiment.\n\nResearcher: Press space to resume the experiment.",
+                                 GERMAN_TRANSLATION_NEEDED} },
+
         { "please find prompt", new string[] {"please find the ", "Bitte finden Sie "} },
         { "bakery", new string[] {"bakery", "die Bäckerei"} },
         { "barber shop", new string[] {"barber shop", "den Friseur"} },
